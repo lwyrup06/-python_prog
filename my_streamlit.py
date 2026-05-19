@@ -1,54 +1,42 @@
-
 import streamlit as st
-import pandas as pd
 import numpy as np
+import pandas as pd
 
-# 1. 앱 제목 및 텍스트 설정
-st.title("🚀 나의 첫 스트림릿 웹 앱")
-st.header("간단한 데이터 시각화 및 입력 예제")
-st.write("스트림릿을 사용하면 파이썬 코드가 그대로 멋진 웹 사이트가 됩니다.")
-
----
-
-# 2. 사이드바 만들기
-st.sidebar.header("⚙️ 설정 메뉴")
-user_name = st.sidebar.text_input("이름을 입력하세요:", "홍길동")
-sample_size = st.sidebar.slider("생성할 데이터 개수", min_value=10, max_value=200, value=100)
+# 1. 앱 제목 설정
+st.title("📈 실시간 함수 그래프 시각화")
+st.write("사이드바의 수치를 조절하면 그래프가 실시간으로 업데이트됩니다.")
 
 ---
 
-# 3. 데이터 입력 및 사용자 반응 (Widget)
-st.subheader(f"👋 환영합니다, {user_name}님!")
-
-# 버튼 클릭 이벤트
-if st.button("인사말 건네기"):
-    st.success(f"{user_name}님, 오늘도 좋은 하루 되세요!")
+# 2. 사이드바 제어 요소 (파일 필요 없음)
+st.sidebar.header("🎛️ 그래프 제어")
+frequency = st.sidebar.slider("주파수 (Frequency)", min_value=1.0, max_value=10.0, value=2.0, step=0.5)
+amplitude = st.sidebar.slider("진폭 (Amplitude)", min_value=0.5, max_value=5.0, value=1.0, step=0.1)
 
 ---
 
-# 4. 데이터프레임 및 차트 그리기
-st.subheader("📊 무작위 데이터 시각화")
+# 3. 데이터 실시간 생성 (Numpy 연산)
+# 0부터 10까지 500개의 구간으로 나눔
+x = np.linspace(0, 10, 500)
+# 사용자 입력값(진폭, 주파수)을 반영한 사인 함수 계산
+y = amplitude * np.sin(frequency * x)
 
-# 사이드바에서 선택한 개수만큼 랜덤 데이터 생성
-chart_data = pd.DataFrame(
-    np.random.randn(sample_size, 3),
-    columns=['데이터 A', '데이터 B', '데이터 C']
-)
+# 스트림릿 차트용 데이터프레임 만들기
+chart_data = pd.DataFrame({
+    'X축 (시간)': x,
+    'Y축 (값)': y
+}).set_index('X축 (시간)')
 
-# 데이터프레임 출력
-st.write("생성된 데이터의 일부입니다:")
-st.dataframe(chart_data.head())
+---
 
-# 라인 차트 출력
-st.write("선 그래프 차트:")
+# 4. 결과 출력
+st.subheader("📊 생성된 사인파(Sine Wave) 그래프")
 st.line_chart(chart_data)
 
----
-
-# 5. 선택 상자 (Selectbox) 예시
-st.subheader("🔍 보기 선택")
-option = st.selectbox(
-    '가장 좋아하는 프로그래밍 언어는?',
-    ['Python', 'Java', 'JavaScript', 'C++']
-)
-st.write(f'선택하신 언어는 **{option}** 입니다.')
+# 미니 통계 데이터 보여주기
+st.subheader("📋 데이터 요약")
+col1, col2 = st.columns(2)
+with col1:
+    st.metric(label="최대값 (Max)", value=f"{chart_data['Y축 (값)'].max():.2f}")
+with col2:
+    st.metric(label="최소값 (Min)", value=f"{chart_data['Y축 (값)'].min():.2f}")
